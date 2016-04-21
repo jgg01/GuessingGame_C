@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -std=c99 -g -Wall
 LIB = /home/ff/cs9c/lib
 animal1 : animal1.o $(LIB)/p4.o
 	$(CC) $(CFLAGS) -o animal1 animal1.o $(LIB)/p4.o

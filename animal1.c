@@ -4,8 +4,9 @@ typedef int boolean;
 #define MAXSTR 80
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "animal.h"
-
+/* initialize the tree from a file whose name is specified as a command line argument. Your program should check the result of the fopen function to ensure that a legal file name was specified. When your program exits, it should save the new tree to that file, after again checking to make sure the file is writable */
 struct treeStruct {
 	char *string;
 	struct treeStruct *left, *right;
@@ -16,7 +17,16 @@ struct positionStruct {
 };
 
 TreeType InitTree (char *file) {
+	TreeType *tree = (TreeType*)malloc(sizeof(TreeType));
 	
+	if (file == NULL) {
+		printf("Invalid file.");
+		exit(0);
+	}
+	while (fgets(tree->string, sizeof (char), file) != NULL) {
+		//treeStruct->left
+		printf("input tree: %s", tree-> string);
+	}	
 }
 void WriteTree (TreeType tree, char *file) {
 }

@@ -5,6 +5,7 @@ typedef int boolean;
 #define MAXNUMQS 80
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "animal.h"
 
 struct treeStruct {
@@ -16,15 +17,64 @@ struct positionStruct {
 };
 
 TreeType InitTree (char *file) {
-	
+	FILE *f = fopen(file, "r");
+	if (f == NULL) {
+		perror("Invalid filename");
+		exit(0);
+	}
+	TreeType tree = (TreeType)malloc(MAXNUMQS * MAXNUMQS * sizeof(TreeType));
+	int i = 0;
+	for(; i < MAXNUMQS; i++) {
+		tree->nodes[i] = (char*) malloc(MAXSTR *sizeof(char));
+	}
+	i = 0;
+	char mystring[MAXSTR];
+	while (fgets (mystring, MAXSTR, f) != NULL) {
+		if (mystring[strlen(mystring) - 1] == '\n') {
+		    mystring[strlen(mystring) - 1] = '\0';
+		}
+		tree->nodes[i] = mystring;
+		printf("input tree: %s at i %d\n", tree->nodes[i], i);
+		PrintTree(tree);
+		i++;
+	}
+	PrintTree(tree);
+	fclose(f);
+	return tree;
 }
+
 void WriteTree (TreeType tree, char *file) {
+	FILE *f = fopen(file, "w");
+	if (f == NULL) {
+		perror("Invalid filename");
+		exit(0);
+	}
+	int i;
+	for (i = 0; i < MAXNUMQS; i++) {
+		fputs(tree->nodes[i], f);
+	}
+	fclose(f);
 }
 void PrintTree (TreeType tree) {
+	int i;
+	for (i = 0; i < 5; i++) {
+		printf("%d: %s\n", i, tree->nodes[i]);
+	}
 }
 PositionType Top (TreeType tree) {
+	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
+	top->nodeIndex = 0;
+	return top;
 }
 boolean IsLeaf (TreeType tree, PositionType pos) {
+	char* mystring;
+	mystring = tree->nodes[pos->nodeIndex];
+	//printf("mystring is %s", mystring);
+	if (mystring != NULL && strlen(mystring) > 0) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 boolean Answer (char *q) {
 }
@@ -73,18 +123,21 @@ int main (int argc, char *argv[])
         treefile = argv[1];
     }
     tree = InitTree (treefile);
-
+    PrintTree(tree);
     printf("%s", "Think of an animal. I will try to guess what it is.\n"
 		 "Please answer my questions with yes or no.\n");
 
     while (TRUE) {
         pos = Top (tree);
+	//printf("pos is %d", pos->nodeIndex);
+	//PrintTree(tree);
+
         while (!IsLeaf (tree, pos)) {
             pos = Answer(Question(tree,pos))? 
 	       YesNode(tree,pos): NoNode(tree,pos);
         }
         if (Answer (Guess (tree, pos))) {
-            printf ("I got it right!\n");
+            //printf ("I got it right!\n");
         } else {
             GetNewInfo (tree, pos, &newAnswer, &newQuestion);
             ReplaceNode (tree, pos, newAnswer, newQuestion);
