@@ -23,22 +23,25 @@ TreeType InitTree (char *file) {
 		exit(0);
 	}
 	TreeType tree = (TreeType)malloc(MAXNUMQS * MAXNUMQS * sizeof(TreeType));
-	int i = 0;
-	for(; i < MAXNUMQS; i++) {
+	int i;
+	for(i = 0; i < MAXNUMQS; i++) {
 		tree->nodes[i] = (char*) malloc(MAXSTR *sizeof(char));
 	}
-	i = 0;
 	char mystring[MAXSTR];
-	while (fgets (mystring, MAXSTR, f) != NULL) {
+	i = 0;
+	while (fgets (mystring, sizeof(mystring), f) != NULL) {
+		//printf("FIRST input tree: %s at i 0", tree->nodes[0]);
+		//printf("%s\n with i %d\n", mystring, i);
 		if (mystring[strlen(mystring) - 1] == '\n') {
 		    mystring[strlen(mystring) - 1] = '\0';
 		}
-		tree->nodes[i] = mystring;
-		printf("input tree: %s at i %d\n", tree->nodes[i], i);
-		PrintTree(tree);
+		strcpy(tree->nodes[i], mystring);
+		//printf("CHECK: FIRST input tree: %s at i 0 with string %s\n", tree->nodes[0], mystring);
+		//printf("input tree: %s at i %d with string %s\n", tree->nodes[i], i, mystring);
+		//PrintTree(tree);
 		i++;
 	}
-	PrintTree(tree);
+	//PrintTree(tree);
 	fclose(f);
 	return tree;
 }
@@ -52,14 +55,17 @@ void WriteTree (TreeType tree, char *file) {
 	int i;
 	for (i = 0; i < MAXNUMQS; i++) {
 		fputs(tree->nodes[i], f);
+		fputs("\n", f);
 	}
 	fclose(f);
 }
 void PrintTree (TreeType tree) {
+	printf("PRINTTREE START: %s at i 0 with string\n", tree->nodes[0]);
 	int i;
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < 10; i++) {
 		printf("%d: %s\n", i, tree->nodes[i]);
 	}
+	printf("end call to print tree %s\n\n\n", tree->nodes[0]);
 }
 PositionType Top (TreeType tree) {
 	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
@@ -69,26 +75,104 @@ PositionType Top (TreeType tree) {
 boolean IsLeaf (TreeType tree, PositionType pos) {
 	char* mystring;
 	mystring = tree->nodes[pos->nodeIndex];
-	//printf("mystring is %s", mystring);
+	printf("mystring is %s\n", mystring);
 	if (mystring != NULL && strlen(mystring) > 0) {
 		return TRUE;
 	} else {
 		return FALSE;
 	}
 }
+/*
+ *	Print the given question, read the user's answer; return true 
+ *	if the answer supplied starts with"y", false otherwise.
+ */
 boolean Answer (char *q) {
+	printf("inside answer");
+	printf("%s\n", q);
+	char ans;
+	ans =fgetc(stdin);
+	if (ans == 'y') {
+		return TRUE;
+	} else if (ans == 'n') {
+		return FALSE;
+	} else {
+		printf("Please respond 'yes' or 'no'. Lets try again:");
+		return Answer(q);
+	}
 }
+
+/*
+ *	Form a question out of the string stored at position pos in the given
+ *	animal tree, and return the string that contains the question.
+ */
 char *Question (TreeType tree, PositionType pos) {
+	//PrintTree(tree);
+	printf("inside question");
+	if (pos->nodeIndex == 0 && strlen(tree->nodes[pos->nodeIndex]) == 0) {
+		char * dog = "Is it a dog?";
+		printf("returning %s\n", dog);
+		return dog;
+	} else {
+		//return "Is it a dog?";
+		printf("returning %s\n", tree->nodes[pos->nodeIndex]);
+		return tree->nodes[pos->nodeIndex];
+	}
 }
+/*
+ *	Form a guess out of the string stored at position pos in the given
+ *	animal tree, and return the string that contains the guess. 
+ *	(IsLeaf(tree, pos) must be true.)
+ */
 char *Guess (TreeType tree, PositionType pos) {
+	//PrintTree(tree);
+	printf("inside guess");
+	if (pos->nodeIndex == 0 && strlen(tree->nodes[pos->nodeIndex]) == 0) {
+		char * dog = "Is it a dog?";
+		printf("returning %s\n", dog);
+		return dog;
+	} else {
+		//return "Is it a dog?";
+		printf("returning %s\n", tree->nodes[pos->nodeIndex]);
+		return tree->nodes[pos->nodeIndex];
+	}
 }
+/*
+ *	Return the position of the node that corresponds to a "yes" answer
+ *	to the question stored at position pos in the animal tree.
+ */
 PositionType YesNode (TreeType tree, PositionType pos) {
 }
+/*
+ *	Return the position of the node that corresponds to a "no" answer
+ *	to the question stored at position pos in the animal tree.
+ */
 PositionType NoNode (TreeType tree, PositionType pos) {
 }
+
+/*
+ *	Replace the node at position pos in the given animal tree by a node
+ *	containing the given new question whose left child (down the tree in 
+ *	the "yes" direction) contains the string stored at position pos, and 
+ *	whose right child contains the new answer newA. Example:
+ *	It's ok to copy the guess from the old node into the new node, and
+ *	to copy the new question into the guess node.
+ */
 void ReplaceNode (TreeType tree, PositionType pos, char *newA, char *newQ) {
 }
+
+/*
+ *	Admit that you guessed wrong, ask the player what animal he/she was 
+ *	thinking of, and return this in *newA.  Also ask for a question that 
+ *	would be answered "yes" for what you guessed and "no" for what the 
+ *	player was thinking of, and return this in *newQ.  (The node with
+ *	your guess is at position pos in the tree.)
+ */
 void GetNewInfo (TreeType tree, PositionType pos, char **newA, char **newQ) {
+	printf("I guessed wrong?! What animal are you thinking of?\n");
+	*newA = malloc(MAXSTR * sizeof(char));
+	fgets(*newA, MAXSTR, stdin);
+	//printf("%s", *newA);
+	//printf("Please, may I have a question that would be answered \"yes\" for a(n) %s and \"no\" for a(n) %s?\n", tree->nodes[pos->nodeIndex], *newA);
 }
 
 
@@ -129,7 +213,7 @@ int main (int argc, char *argv[])
 
     while (TRUE) {
         pos = Top (tree);
-	//printf("pos is %d", pos->nodeIndex);
+	printf("pos is %d\n", pos->nodeIndex);
 	//PrintTree(tree);
 
         while (!IsLeaf (tree, pos)) {
