@@ -77,10 +77,9 @@ void WriteTree (TreeType tree, char *file) {
 	fclose(f);
 }
 void PrintTree (TreeType tree) {
-	int i;
-	for (i = 0; i < MAXNUMQS; i++) {
-		//printf("%d: %s\n", i, tree->nodes[i]);
-	}
+	printf("%s\n", tree->string);
+	PrintTree(tree->left);
+	PrintTree(tree->right);
 }
 PositionType Top (TreeType tree) {
 	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
