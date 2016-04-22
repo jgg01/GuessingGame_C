@@ -9,6 +9,7 @@ typedef int boolean;
 #include "animal.h"
 
 TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) ;
+void freeTree(TreeType tree) ;
 
 /* initialize the tree from a file whose name is specified as a command line argument. Your program should check the result of the fopen function to ensure that a legal file name was specified. When your program exits, it should save the new tree to that file, after again checking to make sure the file is writable */
 struct treeStruct {
@@ -37,12 +38,14 @@ TreeType InitTree (char *file) {
 		    mystring[strlen(mystring) - 1] = '\0';
 		}
 		strcpy(nodes[i], mystring);
-		printf("nodes at %d is %s\n", i, nodes[i]);
+		i++;
+	}
+	while (i < MAXNUMQS) {
+		strcpy(nodes[i], "\0");
 		i++;
 	}
 	tree->string = (char*)malloc(MAXSTR * sizeof(char));
 	strcpy(tree->string, nodes[0]);
-	printf("stored %s at %d\n", tree->string, 0);
 	int k = 0;
 	tree->left = TreeAtI(nodes,  2*k+1);
 	tree->right = TreeAtI(nodes, 2*k+2);
@@ -52,14 +55,12 @@ TreeType InitTree (char *file) {
 }
 
 TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) {
-	if (loc >= MAXNUMQS) {
+	if (loc > MAXNUMQS) {
 		return NULL;
 	}
-	printf("Storing %s at loc %d\n", str[loc], loc);
 	TreeType tree = (TreeType) malloc(MAXSTR * sizeof(char*) + 2 * sizeof(TreeType));
 	tree->string = (char*)malloc(MAXSTR * sizeof(char));
 	strcpy(tree->string, str[loc]);
-	printf("stored %s at %d\n", tree->string, loc);
 	tree->left = TreeAtI(str, 2*loc+1);
 	tree->right = TreeAtI(str, 2*loc+2);
 	return tree;
@@ -71,11 +72,46 @@ void WriteTree (TreeType tree, char *file) {
 		perror("Invalid filename");
 		exit(0);
 	}
-	fputs(tree->string, f);
-	WriteTree(tree->left, f);
-	WriteTree(tree->right, f);
+	char nodes[MAXNUMQS][MAXSTR];
+	int k = 0;
+	strcpy(nodes[k], tree->string);
+	TreeType orig = tree;
+	int i;
+	for(i = 1; i < MAXNUMQS; i++) {
+		strcpy(nodes[i], "\0");
+	}
+	while (tree->left != NULL && k < MAXNUMQS) {
+		k = k * 2 + 1;
+		strcpy(nodes[k], tree->left->string);
+		tree = tree->left;
+	}
+	tree = orig;
+	k = 0;
+	while (tree->right != NULL && k < MAXNUMQS) {
+		k = k * 2 + 2;
+		strcpy(nodes[k], tree->right->string);
+		tree = tree->right;
+	}
+	int j = 0;
+	for (; j < MAXNUMQS; j++) {
+		fputs(nodes[j], f);
+		fputs("\n", f);
+	}
 	fclose(f);
+
+	freeTree(tree);
+
 }
+/* Frees all allocated elements of tree */
+void freeTree(TreeType tree) {
+	if (tree != NULL) {
+		freeTree(tree->left);
+		freeTree(tree->right);
+		free(tree->string);	
+		free(tree);
+	}
+}
+
 void PrintTree (TreeType tree) {
 	printf("%s\n", tree->string);
 	PrintTree(tree->left);
@@ -83,7 +119,7 @@ void PrintTree (TreeType tree) {
 }
 PositionType Top (TreeType tree) {
 	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
-	//top->nodeIndex = 0;
+	top->node = tree;
 	return top;
 }
 
@@ -92,10 +128,11 @@ PositionType Top (TreeType tree) {
  *	when the string stored at pos is a guess rather than a question.
  */
 boolean IsLeaf (TreeType tree, PositionType pos) {
-	char* mystring;
-	char * yes;
-	char * no;
-	if ((strcmp(yes, "\0") == 0) && (strcmp(no, "\0") == 0)) {
+	char* mystring = (char*)malloc(MAXSTR * sizeof(char));
+	mystring = tree->string;
+	if (tree->left == NULL && tree->right == NULL) {
+		return TRUE;
+	} else if((strcmp(pos->node->left->string, "\0") == 0) && (strcmp(pos->node->right->string, "\0") == 0)) {
 		return TRUE;
 	} else {
 		return FALSE;
@@ -106,7 +143,7 @@ boolean IsLeaf (TreeType tree, PositionType pos) {
  *	if the answer supplied starts with"y", false otherwise.
  */
 boolean Answer (char *q) {
-	printf("%s", q);
+	printf("%s ", q);
 	char ans;
 	char mystring[MAXSTR];
 	ans =fgetc(stdin);
@@ -126,8 +163,7 @@ boolean Answer (char *q) {
  *	animal tree, and return the string that contains the question.
  */
 char *Question (TreeType tree, PositionType pos) {
-	//return tree->nodes[pos->nodeIndex];
-	return NULL;
+	return pos->node->string;
 }
 /*
  *	Form a guess out of the string stored at position pos in the given
@@ -135,21 +171,29 @@ char *Question (TreeType tree, PositionType pos) {
  *	(IsLeaf(tree, pos) must be true.)
  */
 char *Guess (TreeType tree, PositionType pos) {
-	char * dog = "Is it a dog? ";
+	char * dog = (char*)malloc(MAXSTR * sizeof(char));
+	strcpy(dog, "Is it a ");
+	char * ans = (char*)malloc(MAXSTR * sizeof(char));
+	strcpy(ans, pos->node->string);
+	strcat(dog, ans);
+	strcat(dog, "? ");
+	return dog;
 }
 /*
  *	Return the position of the node that corresponds to a "yes" answer
  *	to the question stored at position pos in the animal tree.
  */
 PositionType YesNode (TreeType tree, PositionType pos) {
-	return NULL;
+	pos->node = pos->node->left;
+	return pos;
 }
 /*
  *	Return the position of the node that corresponds to a "no" answer
  *	to the question stored at position pos in the animal tree.
  */
 PositionType NoNode (TreeType tree, PositionType pos) {
-return NULL;
+	pos->node = pos->node->right;
+	return pos;
 }
 
 /*
@@ -162,10 +206,10 @@ return NULL;
  */
 void ReplaceNode (TreeType tree, PositionType pos, char *newA, char *newQ) {
 	char *oldguess = malloc(MAXSTR * sizeof(char));
-	//strcpy(oldguess, tree->nodes[index]);
-	//strcpy(tree->nodes[index], newQ);
-	//strcpy(tree->nodes[index*2+1], oldguess);
-	//strcpy(tree->nodes[index*2+2], newA);
+	strcpy(oldguess, pos->node->string);
+	strcpy(pos->node->string, newQ);
+	strcpy(pos->node->left->string, oldguess);
+	strcpy(pos->node->right->string, newA);
 }
 
 /*
@@ -184,7 +228,7 @@ void GetNewInfo (TreeType tree, PositionType pos, char **newA, char **newQ) {
 	if (mystring[strlen(mystring) - 1] == '\n') {
 	    mystring[strlen(mystring) - 1] = '\0';
 	}
-	//printf("Please, may I have a question that would be answered \"yes\" for %s and \"no\" for a(n) %s? ", tree->nodes[pos->nodeIndex], *newA);
+	printf("Please, may I have a question that would be answered \"yes\" for %s and \"no\" for a(n) %s? ", pos->node->string, *newA);
 	*newQ = malloc(MAXSTR * sizeof(char));
 	fgets(*newQ, MAXSTR, stdin);
 	mystring = *newQ;

@@ -52,7 +52,19 @@ void WriteTree (TreeType tree, char *file) {
 		fputs("\n", f);
 	}
 	fclose(f);
+	freeTree(tree);
 }
+
+/* Frees all allocated elements of tree */
+void freeTree(TreeType tree) {
+	int i;
+	for(i = 0; i < MAXNUMQS; i++) {
+		free(tree->nodes[i]);
+	}
+	free(tree);
+}
+
+
 void PrintTree (TreeType tree) {
 	int i;
 	for (i = 0; i < MAXNUMQS; i++) {

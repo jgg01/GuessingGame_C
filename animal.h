@@ -5,6 +5,7 @@ typedef struct positionStruct *PositionType;
 
 TreeType InitTree (char *file);
 void WriteTree (TreeType tree, char *file);
+void freeTree(TreeType tree) ;
 void PrintTree (TreeType tree);
 PositionType Top (TreeType tree);
 boolean IsLeaf (TreeType tree, PositionType pos);
