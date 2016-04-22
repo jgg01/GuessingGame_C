@@ -2,10 +2,14 @@ typedef int boolean;
 #define FALSE 0
 #define TRUE !FALSE
 #define MAXSTR 80
+#define MAXNUMQS 80
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "animal.h"
+
+TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) ;
+
 /* initialize the tree from a file whose name is specified as a command line argument. Your program should check the result of the fopen function to ensure that a legal file name was specified. When your program exits, it should save the new tree to that file, after again checking to make sure the file is writable */
 struct treeStruct {
 	char *string;
@@ -17,39 +21,179 @@ struct positionStruct {
 };
 
 TreeType InitTree (char *file) {
-	TreeType *tree = (TreeType*)malloc(sizeof(TreeType));
-	
-	if (file == NULL) {
-		printf("Invalid file.");
+	FILE *f = fopen(file, "r");
+	if (f == NULL) {
+		perror("Invalid filename");
 		exit(0);
 	}
-	while (fgets(tree->string, sizeof (char), file) != NULL) {
-		//treeStruct->left
-		printf("input tree: %s", tree-> string);
-	}	
+	TreeType tree = (TreeType) malloc(MAXSTR * sizeof(char*) + 2 * sizeof(TreeType));
+	char mystring[MAXSTR];
+	char nodes[MAXNUMQS][MAXSTR];
+	int j;
+
+	int i = 0;
+	while (fgets (mystring, sizeof(mystring), f) != NULL) {
+		if (mystring[strlen(mystring) - 1] == '\n') {
+		    mystring[strlen(mystring) - 1] = '\0';
+		}
+		strcpy(nodes[i], mystring);
+		printf("nodes at %d is %s\n", i, nodes[i]);
+		i++;
+	}
+	tree->string = (char*)malloc(MAXSTR * sizeof(char));
+	strcpy(tree->string, nodes[0]);
+	printf("stored %s at %d\n", tree->string, 0);
+	int k = 0;
+	tree->left = TreeAtI(nodes,  2*k+1);
+	tree->right = TreeAtI(nodes, 2*k+2);
+	
+	fclose(f);
+	return tree;
 }
+
+TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) {
+	if (loc >= MAXNUMQS) {
+		return NULL;
+	}
+	printf("Storing %s at loc %d\n", str[loc], loc);
+	TreeType tree = (TreeType) malloc(MAXSTR * sizeof(char*) + 2 * sizeof(TreeType));
+	tree->string = (char*)malloc(MAXSTR * sizeof(char));
+	strcpy(tree->string, str[loc]);
+	printf("stored %s at %d\n", tree->string, loc);
+	tree->left = TreeAtI(str, 2*loc+1);
+	tree->right = TreeAtI(str, 2*loc+2);
+	return tree;
+}
+
 void WriteTree (TreeType tree, char *file) {
+	FILE *f = fopen(file, "w");
+	if (f == NULL) {
+		perror("Invalid filename");
+		exit(0);
+	}
+	fputs(tree->string, f);
+	WriteTree(tree->left, f);
+	WriteTree(tree->right, f);
+	fclose(f);
 }
 void PrintTree (TreeType tree) {
+	int i;
+	for (i = 0; i < MAXNUMQS; i++) {
+		//printf("%d: %s\n", i, tree->nodes[i]);
+	}
 }
 PositionType Top (TreeType tree) {
+	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
+	//top->nodeIndex = 0;
+	return top;
 }
+
+/*
+ *	Return true exactly when pos is a "leaf" of the animal tree, that is,
+ *	when the string stored at pos is a guess rather than a question.
+ */
 boolean IsLeaf (TreeType tree, PositionType pos) {
+	char* mystring;
+	char * yes;
+	char * no;
+	if ((strcmp(yes, "\0") == 0) && (strcmp(no, "\0") == 0)) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
+/*
+ *	Print the given question, read the user's answer; return true 
+ *	if the answer supplied starts with"y", false otherwise.
+ */
 boolean Answer (char *q) {
+	printf("%s", q);
+	char ans;
+	char mystring[MAXSTR];
+	ans =fgetc(stdin);
+	fgets(mystring, MAXSTR, stdin);
+	if (ans == 'y') {
+		return TRUE;
+	} else if (ans == 'n') {
+		return FALSE;
+	} else {
+		printf("Please respond 'yes' or 'no'. Lets try again:");
+		return Answer(q);
+	}
 }
+
+/*
+ *	Form a question out of the string stored at position pos in the given
+ *	animal tree, and return the string that contains the question.
+ */
 char *Question (TreeType tree, PositionType pos) {
+	//return tree->nodes[pos->nodeIndex];
+	return NULL;
 }
+/*
+ *	Form a guess out of the string stored at position pos in the given
+ *	animal tree, and return the string that contains the guess. 
+ *	(IsLeaf(tree, pos) must be true.)
+ */
 char *Guess (TreeType tree, PositionType pos) {
+	char * dog = "Is it a dog? ";
 }
+/*
+ *	Return the position of the node that corresponds to a "yes" answer
+ *	to the question stored at position pos in the animal tree.
+ */
 PositionType YesNode (TreeType tree, PositionType pos) {
+	return NULL;
 }
+/*
+ *	Return the position of the node that corresponds to a "no" answer
+ *	to the question stored at position pos in the animal tree.
+ */
 PositionType NoNode (TreeType tree, PositionType pos) {
+return NULL;
 }
+
+/*
+ *	Replace the node at position pos in the given animal tree by a node
+ *	containing the given new question whose left child (down the tree in 
+ *	the "yes" direction) contains the string stored at position pos, and 
+ *	whose right child contains the new answer newA. Example:
+ *	It's ok to copy the guess from the old node into the new node, and
+ *	to copy the new question into the guess node.
+ */
 void ReplaceNode (TreeType tree, PositionType pos, char *newA, char *newQ) {
+	char *oldguess = malloc(MAXSTR * sizeof(char));
+	//strcpy(oldguess, tree->nodes[index]);
+	//strcpy(tree->nodes[index], newQ);
+	//strcpy(tree->nodes[index*2+1], oldguess);
+	//strcpy(tree->nodes[index*2+2], newA);
 }
+
+/*
+ *	Admit that you guessed wrong, ask the player what animal he/she was 
+ *	thinking of, and return this in *newA.  Also ask for a question that 
+ *	would be answered "yes" for what you guessed and "no" for what the 
+ *	player was thinking of, and return this in *newQ.  (The node with
+ *	your guess is at position pos in the tree.)
+ */
 void GetNewInfo (TreeType tree, PositionType pos, char **newA, char **newQ) {
+	printf("I guessed wrong?! What animal are you thinking of?\n");
+	*newA = malloc(MAXSTR * sizeof(char));
+	fgets(*newA, MAXSTR, stdin);
+	char *mystring;
+	mystring = *newA;
+	if (mystring[strlen(mystring) - 1] == '\n') {
+	    mystring[strlen(mystring) - 1] = '\0';
+	}
+	//printf("Please, may I have a question that would be answered \"yes\" for %s and \"no\" for a(n) %s? ", tree->nodes[pos->nodeIndex], *newA);
+	*newQ = malloc(MAXSTR * sizeof(char));
+	fgets(*newQ, MAXSTR, stdin);
+	mystring = *newQ;
+	if (mystring[strlen(mystring) - 1] == '\n') {
+	    mystring[strlen(mystring) - 1] = '\0';
+	}
 }
+
 
 
 /*
