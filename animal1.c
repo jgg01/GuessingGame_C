@@ -37,11 +37,8 @@ TreeType InitTree (char *file) {
 		exit(0);
 	}
 	TreeType tree = (TreeType) malloc(MAXSTR * sizeof(char*) + 2 * sizeof(TreeType));
-	char mystring[MAXSTR];
-	char nodes[MAXNUMQS][MAXSTR];
-	int j;
-
-	int i = 0;
+	char mystring[MAXSTR];	char nodes[MAXNUMQS][MAXSTR];
+	int j;	int i = 0;
 	while (fgets (mystring, sizeof(mystring), f) != NULL) {
 		if (mystring[strlen(mystring) - 1] == '\n') {
 		    mystring[strlen(mystring) - 1] = '\0';
@@ -58,7 +55,6 @@ TreeType InitTree (char *file) {
 	int k = 0;
 	tree->left = TreeAtI(nodes,  2*k+1);
 	tree->right = TreeAtI(nodes, 2*k+2);
-	
 	fclose(f);
 	return tree;
 }
@@ -87,11 +83,9 @@ void WriteTree (TreeType tree, char *file) {
 		perror("Invalid filename");
 		exit(0);
 	}
-	char nodes[MAXNUMQS][MAXSTR];
-	int k = 0;
+	char nodes[MAXNUMQS][MAXSTR];	int k = 0;
 	strcpy(nodes[k], tree->string);
-	TreeType orig = tree;
-	int i;
+	TreeType orig = tree;	int i;
 	for(i = 1; i < MAXNUMQS; i++) {
 		strcpy(nodes[i], "\0");
 	}
@@ -100,8 +94,7 @@ void WriteTree (TreeType tree, char *file) {
 		strcpy(nodes[k], tree->left->string);
 		tree = tree->left;
 	}
-	tree = orig;
-	k = 0;
+	tree = orig;	k = 0;
 	while (tree->right != NULL && k < MAXNUMQS) {
 		k = k * 2 + 2;
 		strcpy(nodes[k], tree->right->string);
@@ -113,9 +106,7 @@ void WriteTree (TreeType tree, char *file) {
 		fputs("\n", f);
 	}
 	fclose(f);
-
 	freeTree(tree);
-
 }
 /* Frees all allocated elements of tree */
 void freeTree(TreeType tree) {
@@ -154,7 +145,8 @@ boolean IsLeaf (TreeType tree, PositionType pos) {
 	mystring = tree->string;
 	if (tree->left == NULL && tree->right == NULL) {
 		return TRUE;
-	} else if((strcmp(pos->node->left->string, "\0") == 0) && (strcmp(pos->node->right->string, "\0") == 0)) {
+	} else if((strcmp(pos->node->left->string, "\0") == 0) 
+			&& (strcmp(pos->node->right->string, "\0") == 0)) {
 		return TRUE;
 	} else {
 		return FALSE;
