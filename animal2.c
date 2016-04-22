@@ -8,14 +8,23 @@ typedef int boolean;
 #include <stdlib.h>
 #include "animal.h"
 
+/*
+ *	Stores Tree via array structure
+ */
 struct treeStruct {
 	char *nodes[MAXNUMQS];
 };
 
+/*
+ *	Stores position
+ */
 struct positionStruct {
 	int nodeIndex;
 };
 
+/*
+ *	Return an animal tree.
+ */
 TreeType InitTree (char *file) {
 	FILE *f = fopen(file, "r");
 	if (f == NULL) {
@@ -40,6 +49,9 @@ TreeType InitTree (char *file) {
 	return tree;
 }
 
+/*
+ *	Writes an animal tree to file
+ */
 void WriteTree (TreeType tree, char *file) {
 	FILE *f = fopen(file, "w");
 	if (f == NULL) {
@@ -65,12 +77,19 @@ void freeTree(TreeType tree) {
 }
 
 
+/*
+ *	Prints an animal tree.
+ */
 void PrintTree (TreeType tree) {
 	int i;
 	for (i = 0; i < MAXNUMQS; i++) {
 		printf("%d: %s\n", i, tree->nodes[i]);
 	}
 }
+
+/*
+ *	Tracks the top node of tree
+ */
 PositionType Top (TreeType tree) {
 	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
 	top->nodeIndex = 0;

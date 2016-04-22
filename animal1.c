@@ -11,16 +11,25 @@ typedef int boolean;
 TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) ;
 void freeTree(TreeType tree) ;
 
-/* initialize the tree from a file whose name is specified as a command line argument. Your program should check the result of the fopen function to ensure that a legal file name was specified. When your program exits, it should save the new tree to that file, after again checking to make sure the file is writable */
+
+/*
+ *	Stores tree using recursive allocation
+ */
 struct treeStruct {
 	char *string;
 	struct treeStruct *left, *right;
 };
-	
+
+/*
+ *	Stores current position tree
+ */
 struct positionStruct {
 	struct treeStruct* node;
 };
 
+/*
+ *	Return an animal tree.
+ */
 TreeType InitTree (char *file) {
 	FILE *f = fopen(file, "r");
 	if (f == NULL) {
@@ -54,6 +63,9 @@ TreeType InitTree (char *file) {
 	return tree;
 }
 
+/*
+ *	Given an array and location within, iteratively returns the given tree
+ */
 TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) {
 	if (loc > MAXNUMQS) {
 		return NULL;
@@ -66,6 +78,9 @@ TreeType TreeAtI(char str[MAXNUMQS][MAXSTR], int loc) {
 	return tree;
 }
 
+/*
+ *	Writes tree to file
+ */
 void WriteTree (TreeType tree, char *file) {
 	FILE *f = fopen(file, "w");
 	if (f == NULL) {
@@ -112,11 +127,18 @@ void freeTree(TreeType tree) {
 	}
 }
 
+/*
+ *	Prints an animal tree.
+ */
 void PrintTree (TreeType tree) {
 	printf("%s\n", tree->string);
 	PrintTree(tree->left);
 	PrintTree(tree->right);
 }
+
+/*
+ *	Tracks top element
+ */
 PositionType Top (TreeType tree) {
 	PositionType top = (PositionType)malloc(sizeof(int) +  sizeof(PositionType));
 	top->node = tree;
